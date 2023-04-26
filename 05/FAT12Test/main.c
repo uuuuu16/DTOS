@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <fcntl.h>
+#include <malloc.h>
+#include <string.h>
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -28,6 +30,16 @@ typedef struct {
     char BS_VolLab[11];
     char BS_FileSysType[8];
 } Fat12Header;
+
+typedef struct {
+    char DIR_Name[11];
+    uchar DIR_Attr;
+    uchar reserve[10];
+    ushort DIR_WrtTime;
+    ushort DIR_WrtDate;
+    ushort DIR_FstClus;
+    uint DIR_FileSize;
+} RootEntry;
 
 void PrintHeader(Fat12Header* header, int fd)
 {
@@ -70,6 +82,38 @@ void PrintHeader(Fat12Header* header, int fd)
     printf("Byte 511: 0x%x\n", b511);
 }
 
+RootEntry* FindRootEntry(Fat12Header* header, int fd, int idx)
+{
+    RootEntry* re = (RootEntry*)malloc(sizeof(RootEntry));
+    memset(re, 0, sizeof(RootEntry));
+
+    lseek(fd, 19 * header->BPB_BytsPerSec + idx * sizeof(RootEntry), SEEK_SET);
+    read(fd, re, sizeof(RootEntry));
+
+    return re;
+}
+
+void PrintRootEntry(Fat12Header* header, int fd)
+{
+    int i = 0;
+    for (i = 0; i < header->BPB_RootEntCnt; i++) {
+        RootEntry* re = FindRootEntry(header, fd, i);
+
+        if (re->DIR_Name[0] != '\0') {
+            printf("i : %d\n", i);
+            printf("DIR_Name: %s\n", re->DIR_Name);
+            printf("DIR_Attr: 0x%x\n", re->DIR_Attr);
+            printf("DIR_WrtDate: 0x%x\n", re->DIR_WrtDate);
+            printf("DIR_WrtTime: 0x%x\n", re->DIR_WrtTime);
+            printf("DIR_FstClus: 0x%x\n", re->DIR_FstClus);
+            printf("DIR_FileSize: 0x%x\n", re->DIR_FileSize);
+            printf("\n");
+        }
+
+        free(re);
+    }
+}
+
 int main()
 {
     Fat12Header header;
@@ -82,6 +126,8 @@ int main()
 
     PrintHeader(&header, fd);
 
+    printf("\n");
+    PrintRootEntry(&header, fd);
 
     close(fd);
 
