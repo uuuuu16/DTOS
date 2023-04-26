@@ -5,6 +5,7 @@ typedef unsigned int uint;
 typedef unsigned short ushort;
 typedef unsigned char uchar;
 
+#pragma pack (1)
 typedef struct {
     char BS_OEMName[8];
     ushort BPB_BytsPerSec;
@@ -36,9 +37,9 @@ int main()
 
     read(fd, &header, sizeof(Fat12Header));
 
-    header.BS_OEMName[7] = '\0';
-    header.BS_VolLab[10] = '\0';
-    header.BS_FileSysType[7] = '\0';
+    header.BS_OEMName[7] = 0;
+    header.BS_VolLab[10] = 0;
+    header.BS_FileSysType[7] = 0;
 
     printf("BS_OEMName: %s\n", header.BS_OEMName);
     printf("BPB_BytsPerSec: %x\n", header.BPB_BytsPerSec);
@@ -65,11 +66,11 @@ int main()
     uchar b510 = 0;
     uchar b511 = 0;
 
-    read(fd, &b510, 1);
-    read(fd, &b511, 1);
+    read(fd, &b510, sizeof(uchar));
+    read(fd, &b511, sizeof(uchar));
     
-    printf("Byte 510: \n", b510);
-    printf("Byte 511: \n", b511);
+    printf("Byte 510: 0x%x\n", b510);
+    printf("Byte 511: 0x%x\n", b511);
 
     close(fd);
 
