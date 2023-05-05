@@ -116,12 +116,20 @@ RootEntry* FindRootEntryByFileName(Fat12Header* header, FILE* fp, char* name)
                     free(prefix);
                     free(suffix);
                     return re;
+                } else {
+                    free(prefix);
+                    free(suffix);
+                    free(re);
                 }
             } else {
                 if(strncmp(re->DIR_Name, name, sizeof(re->DIR_Name)) == 0 ) {
                     return re;
+                } else {
+                    free(re);
                 }
             }
+        } else {
+            free(re);
         }
     }
 
@@ -151,9 +159,7 @@ void PrintRootEntry(Fat12Header* header, FILE* fp)
 
 ushort* ReadFat(Fat12Header* header, FILE* fp)
 {
-    int size = header->BPB_BytsPerSec * 9;
-    // printf("size = %d, size*2/3 = %d\n", size, size*2/3);
-    
+    int size = header->BPB_BytsPerSec * 9;    
     uchar* fat = (uchar*)malloc(size);
     
     fseek(fp, header->BPB_BytsPerSec * 1, SEEK_SET);
@@ -166,8 +172,6 @@ ushort* ReadFat(Fat12Header* header, FILE* fp)
     for (i = 0, j = 0; i < size; i += 3, j += 2) {
         ret[j] = (ushort)((fat[i + 1] & 0x0f) << 8) | fat[i];
         ret[j + 1] = (ushort)(fat[i + 2] << 4) | ((fat[i + 1] >> 4) & 0x0f);
-        // printf("size = %d, i = %d, j = %d, ret[j] = %d, ret[j+1] = %d, fat[i] = %d, fat[i+1] = %d, fat[i+2] = %d\n",
-        //         size, i, j, ret[j], ret[j+1], fat[i], fat[i+1], fat[i+2]);
     }
     
     // free(fat);
