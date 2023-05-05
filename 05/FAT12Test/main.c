@@ -188,8 +188,9 @@ char* ReadFileContent(Fat12Header* header, FILE* fp, char* name)
 
     char* ret = (char*)malloc(re->DIR_FileSize);
 
+    ushort* vec = ReadFat(header, fp);
+
     if (re->DIR_Name[0] != '\0') {
-        ushort* vec = ReadFat(header, fp);
         int count = 0;
         char buf[512] = {0};
 
@@ -205,8 +206,9 @@ char* ReadFileContent(Fat12Header* header, FILE* fp, char* name)
             }
         }
 
-        // free(vec);
     }
+
+    // free(vec);
 
     free(re);
 
@@ -232,6 +234,7 @@ int main()
     printf("%s\n", buf);
 
     fclose(fp);
+    // free(buf);
 
     return 0;
 }
