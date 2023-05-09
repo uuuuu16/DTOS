@@ -72,14 +72,15 @@ start:
     ; di - dst
     ; cx - len
     mov si, Target
-    mov di, Buf
+    mov di, si
+    add di, 2
     mov cx, TarLen
     call MemCpy
 
     ; jmp last
 
 output:
-    mov bp, Buf
+    mov bp, Target
     mov cx, TarLen
     call Print
 last:
@@ -106,6 +107,7 @@ MemCpy:
 
 begintoend:
     cmp cx, 0
+    jz done
     mov al, [si]
     mov byte [di], al
     inc si
@@ -115,13 +117,14 @@ begintoend:
 
 endtobegin:
     cmp cx, 0
+    jz done
     mov al, [si]
     mov byte [di], al
     dec si
     dec di
     dec cx
     jmp endtobegin
-
+done:
     pop ax
     pop cx
     pop di

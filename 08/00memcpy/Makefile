@@ -1,20 +1,21 @@
+
 .PHONY : all clean rebuild
 
 SRC := boot.asm
 OUT := boot.bin
 IMG := data.img
 
-RM := rm -rf
+RM := rm -fr
 
 all : $(OUT) $(IMG)
 	dd if=$(OUT) of=$(IMG) bs=512 count=1 conv=notrunc
 	@echo "Success!"
 
-$(IMG) :
-	bximage $@ -q -fd -size=1.44
-
 $(OUT) : $(SRC)
 	nasm $^ -o $@
+
+$(IMG) :
+	bximage $@ -q -fd -size=1.44
 
 clean :
 	$(RM) $(IMG) $(OUT)
